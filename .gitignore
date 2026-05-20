@@ -1,6 +1,13 @@
 venv/
 __pycache__/
 *.pyc
+
+models/
+call_samples/
+cleaned_calls/
+
+*.csv
+*.tsv
+*.xlsx
+
 .env
-*.log
-.gradio/
