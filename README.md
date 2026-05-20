@@ -1,4 +1,4 @@
-\# Allo Realtime Voice Agent
+# Allo Realtime Voice Agent
 
 ![Allo Demo](assets/demo.png)
 
