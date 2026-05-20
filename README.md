@@ -1,6 +1,6 @@
 \# Allo Realtime Voice Agent
 
-
+![Allo Demo](assets/demo.png)
 
 Allo is a realtime multilingual AI voice agent prototype for natural business phone conversations.
 
