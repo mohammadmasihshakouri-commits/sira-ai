@@ -2322,6 +2322,8 @@ def process_voice(audio_path, history, stt_test_mode=False, presentation_mode=Tr
         history.append({"role": "Assistant", "content": assistant_reply})
 
         if presentation_mode:
+            pretty_source = source.replace("_", " ").replace("/", " / ")
+            
             output_text = (
                 f"CALL SUMMARY\n\n"
                 f"Customer\n"

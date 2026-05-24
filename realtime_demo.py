@@ -24,7 +24,8 @@ async def home():
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Allo Realtime Demo</title>
+    <title>Sira Realtime Demo
+    </title>
 </head>
 <body>
     <h1>Allo Realtime Voice Demo</h1>
