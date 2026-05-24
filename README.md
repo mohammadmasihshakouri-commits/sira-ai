@@ -1,8 +1,8 @@
-# Allo Realtime Voice Agent
+# Sira Realtime Voice Agent
 
-![Allo Demo](assets/demo.png)
+![Sira Demo](assets/demo.png)
 
-Allo is a realtime multilingual AI voice agent prototype for natural business phone conversations.
+Sira is a realtime multilingual AI voice agent prototype for natural business phone conversations.
 
 
 
