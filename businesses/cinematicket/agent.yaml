@@ -22,6 +22,7 @@ agent:
   fallback:
     fa: "ببخشید، کامل متوجه نشدم. لطفاً یک بار دیگه بفرمایید."
     en: "Sorry, I didn’t fully understand. Could you please repeat that?"
+
 deployment:
   id: "cinematicket_voice_demo"
   channel: "voice_demo"
