@@ -24,103 +24,133 @@ async def home():
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sira Realtime Demo
-    </title>
+    <title>Sira Realtime Voice Demo</title>
 </head>
 <body>
-    <h1>Allo Realtime Voice Demo</h1>
+    <h1>Sira Realtime Voice Demo</h1>
 
     <button id="startBtn">Start</button>
     <button id="stopBtn">Stop</button>
 
+    <h3>Debug Log</h3>
+    <pre id="log" style="background:#111827;color:white;padding:16px;border-radius:12px;min-height:140px;"></pre>
+
+    <h3>Transcript</h3>
     <div id="transcript"></div>
 
     <script>
         const log = document.getElementById("log");
-        let socket;
-        let mediaRecorder;
+        const transcript = document.getElementById("transcript");
 
-function writeTranscript(text, speaker="customer") {
+        let socket = null;
+        let mediaRecorder = null;
+        let mediaStream = null;
 
-    const transcript = document.getElementById("transcript");
+        function write(message) {
+            log.textContent += message + "\\n";
+        }
 
-    const bubble = document.createElement("div");
+        function writeTranscript(text, speaker = "customer") {
+            const bubble = document.createElement("div");
 
-    bubble.style.background =
-        speaker === "customer"
-        ? "#111827"
-        : "#1E293B";
+            bubble.style.background = speaker === "customer" ? "#111827" : "#1E293B";
+            bubble.style.color = "white";
+            bubble.style.padding = "18px";
+            bubble.style.borderRadius = "18px";
+            bubble.style.marginTop = "16px";
+            bubble.style.fontSize = "18px";
+            bubble.style.lineHeight = "1.8";
 
-    bubble.style.color = "white";
-    bubble.style.padding = "18px";
-    bubble.style.borderRadius = "18px";
-    bubble.style.marginTop = "16px";
-    bubble.style.fontSize = "18px";
-    bubble.style.lineHeight = "1.8";
+            bubble.innerHTML = `
+                <strong>${speaker === "customer" ? "Customer" : "Sira"}</strong>
+                <br><br>
+                ${text}
+            `;
 
-    bubble.innerHTML = `
-        <strong>
-            ${speaker === "customer" ? "Customer" : "Allo"}
-        </strong>
-        <br><br>
-        ${text}
-    `;
-
-    transcript.appendChild(bubble);
-
-    transcript.scrollTop = transcript.scrollHeight;
-}
+            transcript.appendChild(bubble);
+            transcript.scrollTop = transcript.scrollHeight;
+        }
 
         document.getElementById("startBtn").onclick = async () => {
-            write("Starting realtime session...");
+            try {
+                write("Start clicked.");
 
-            socket = new WebSocket("ws://127.0.0.1:8000/ws");
+                socket = new WebSocket("ws://127.0.0.1:8000/ws");
 
-            socket.onopen = () => {
-                write("WebSocket connected.");
-            };
+                socket.onopen = () => {
+                    write("WebSocket connected.");
+                };
 
-socket.onmessage = (event) => {
+                socket.onerror = (error) => {
+                    write("WebSocket error.");
+                    console.error(error);
+                };
 
-    const data = JSON.parse(event.data);
+                socket.onclose = () => {
+                    write("WebSocket closed.");
+                };
 
-if (data.type === "transcript") {
-    writeTranscript(data.text, "customer");
-}
-if (data.type === "assistant") {
-    writeTranscript(data.text, "assistant");
-}
-    if (data.type === "error") {
-        writeTranscript("ERROR: " + data.message);
-    }
-};
+                socket.onmessage = (event) => {
+                    write("Server: " + event.data);
 
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    try {
+                        const data = JSON.parse(event.data);
 
-            mediaRecorder = new MediaRecorder(stream, {
-                mimeType: "audio/webm"
-            });
+                        if (data.type === "transcript") {
+                            writeTranscript(data.text, "customer");
+                        }
 
-            mediaRecorder.ondataavailable = async (event) => {
-                if (event.data.size > 0 && socket.readyState === WebSocket.OPEN) {
-                    const buffer = await event.data.arrayBuffer();
-                    socket.send(buffer);
-                }
-            };
+                        if (data.type === "assistant") {
+                            writeTranscript(data.text, "assistant");
+                        }
 
-            mediaRecorder.start(1000);
-            write("Recording started.");
+                        if (data.type === "error") {
+                            writeTranscript("ERROR: " + data.message, "assistant");
+                        }
+                    } catch (e) {
+                        write("Could not parse server message.");
+                    }
+                };
+
+                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                write("Microphone permission granted.");
+
+                mediaRecorder = new MediaRecorder(mediaStream, {
+                    mimeType: "audio/webm"
+                });
+
+                mediaRecorder.ondataavailable = async (event) => {
+                    if (event.data.size > 0 && socket && socket.readyState === WebSocket.OPEN) {
+                        const buffer = await event.data.arrayBuffer();
+                        socket.send(buffer);
+                        write("Sent audio chunk: " + event.data.size + " bytes");
+                    }
+                };
+
+                mediaRecorder.start(1000);
+                write("Recording started.");
+            } catch (error) {
+                write("ERROR: " + error.message);
+                console.error(error);
+            }
         };
 
         document.getElementById("stopBtn").onclick = () => {
-            if (mediaRecorder) {
+            write("Stop clicked.");
+
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
                 mediaRecorder.stop();
                 write("Recording stopped.");
             }
 
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                write("Microphone stopped.");
+            }
+
             if (socket) {
                 socket.close();
-                write("WebSocket closed.");
+                write("WebSocket closed by user.");
             }
         };
     </script>
@@ -132,7 +162,7 @@ if (data.type === "assistant") {
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    await websocket.send_text("Connected to Allo realtime backend.")
+    await websocket.send_text("Connected to Sira realtime backend.")
 
     chunk_count = 0
     audio_buffer = bytearray()
@@ -146,7 +176,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             audio_buffer.extend(audio_chunk)
 
-            if len(audio_buffer) > 120000:
+            if len(audio_buffer) > 30000:
 
                 temp_audio = tempfile.NamedTemporaryFile(
                     suffix=".webm",
@@ -201,7 +231,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 audio_buffer = bytearray()
         last_transcript = ""
     except Exception:
-        await websocket.close()
+        pass
 
 
 if __name__ == "__main__":

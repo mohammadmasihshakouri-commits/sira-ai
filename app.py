@@ -5,7 +5,12 @@ import random
 import yaml
 import tempfile
 import subprocess
-
+from core.runtime_config import (
+    get_platform_name,
+    get_workspace_name,
+    get_agent_label,
+    get_agent_greeting,
+)
 from core.normalization import normalize_text_light
 
 from core.number_parser import (
@@ -81,6 +86,13 @@ OLLAMA_MODEL = "qwen-callcenter"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 MAX_AUDIO_CONFIRMATION_FAILURES = 3
+
+
+PLATFORM_NAME = get_platform_name()
+WORKSPACE_NAME = get_workspace_name()
+AGENT_LABEL = get_agent_label()
+AGENT_GREETING_FA = get_agent_greeting("fa")
+AGENT_GREETING_EN = get_agent_greeting("en")
 
 print("Loading Whisper model... Please wait.")
 print(f"Device: {DEVICE}, Compute type: {COMPUTE_TYPE}, Model: {WHISPER_MODEL_NAME}")
@@ -2328,7 +2340,7 @@ def process_voice(audio_path, history, stt_test_mode=False, presentation_mode=Tr
                 f"CALL SUMMARY\n\n"
                 f"Customer\n"
                 f"{normalized_text}\n\n"
-                f"Allo\n"
+                f"Sira\n"
                 f"{assistant_reply}\n\n"
                 f"STATE\n"
                 f"{pretty_source}\n\n"
@@ -2358,7 +2370,7 @@ def process_voice(audio_path, history, stt_test_mode=False, presentation_mode=Tr
                 f"Customer said:\n"
                 f"{normalized_text}\n\n"
                 f"━━━━━━━━━━━━━━\n\n"
-                f"Allo replied:\n"
+                f"Sirareplied:\n"
                 f"{assistant_reply}\n\n"
                 f"━━━━━━━━━━━━━━\n\n"
                 f"Conversation state:\n"
@@ -3054,13 +3066,13 @@ label {
 """
 
 with gr.Blocks(
-    title="Cinematicket Voice AI",
+    title=f"{PLATFORM_NAME} Voice AI",
     css=custom_css,
     theme=gr.themes.Soft(
         primary_hue="red",
         neutral_hue="slate",
         font=["Vazirmatn", "Arial", "sans-serif"],
-    )
+    ),
 ) as demo:
 
     gr.HTML("""
@@ -3070,9 +3082,9 @@ with gr.Blocks(
                 <div>
                     <div class="kicker">
                         <span class="kicker-dot"></span>
-                        ALLO · VOICE AI PROTOTYPE
+                        Sira· VOICE AI PROTOTYPE
                     </div>
-                    <h1 class="hero-title">Allo؛ اپراتور صوتی هوشمند برای مکالمه‌های واقعی</h1>
+                    <h1 class="hero-title">Sira؛ اپراتور صوتی هوشمند برای مکالمه‌های واقعی</h1>
                     <p class="hero-desc">
                        یک پروتوتایپ واقعی از AI Voice Agent؛ از شنیدن صدای مشتری تا تشخیص نیت，
 اجرای قوانین هر کسب‌وکار و تولید پاسخ کوتاه، طبیعی و قابل اعتماد.
@@ -3325,4 +3337,5 @@ svg.lucide-chevron-down {
     gap: 22px !important;
 }
 """
-demo.launch()
+if __name__ == "__main__":
+    demo.launch()

@@ -1,0 +1,28 @@
+platform:
+  name: "Sira"
+
+workspace:
+  id: "cinematicket"
+  name: "Cinematicket"
+  industry: "cinema_theater"
+  default_language: "fa"
+
+agent:
+  id: "default_agent"
+  name: null
+  name_source: "dashboard"
+  role: "customer_support_voice_agent"
+  default_language: "fa"
+  tone: "short_polite_call_center"
+
+  greeting:
+    fa: null
+    en: null
+
+  fallback:
+    fa: "ببخشید، کامل متوجه نشدم. لطفاً یک بار دیگه بفرمایید."
+    en: "Sorry, I didn’t fully understand. Could you please repeat that?"
+deployment:
+  id: "cinematicket_voice_demo"
+  channel: "voice_demo"
+  status: "testing"
