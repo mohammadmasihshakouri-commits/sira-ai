@@ -2,32 +2,49 @@ import os
 import json
 import asyncio
 import tempfile
-from faster_whisper import WhisperModel
-import numpy as np
-from app import process_text
+
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import HTMLResponse
+from faster_whisper import WhisperModel
+import numpy as np
 import uvicorn
-from app import process_text
 
+from app import process_text
+from core.runtime_config import (
+    get_platform_name,
+    get_agent_label,
+)
 
 app = FastAPI()
+PLATFORM_NAME = get_platform_name()
+AGENT_LABEL = get_agent_label()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+WHISPER_MODEL_PATH = os.getenv(
+    "WHISPER_MODEL_PATH",
+    os.path.join(BASE_DIR, "models", "faster-whisper-large-v3"),
+)
+
+STT_DEVICE = os.getenv("STT_DEVICE", "cuda")
+STT_COMPUTE_TYPE = os.getenv("STT_COMPUTE_TYPE", "float16")
+
 model = WhisperModel(
-    r"C:\Users\Admin\Desktop\voice-demo\models\faster-whisper-large-v3",
-    device="cuda",
-    compute_type="float16"
+    WHISPER_MODEL_PATH,
+    device=STT_DEVICE,
+    compute_type=STT_COMPUTE_TYPE,
 )
 
 @app.get("/")
 async def home():
-    return HTMLResponse("""
+    page = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sira Realtime Voice Demo</title>
+    <title>__PLATFORM_NAME__ Realtime Voice Demo</title>
 </head>
 <body>
-    <h1>Sira Realtime Voice Demo</h1>
+    <h1>__PLATFORM_NAME__ Realtime Voice Demo</h1>
+    <p>Current agent: <strong>__AGENT_LABEL__</strong></p>
 
     <button id="startBtn">Start</button>
     <button id="stopBtn">Stop</button>
@@ -41,6 +58,8 @@ async def home():
     <script>
         const log = document.getElementById("log");
         const transcript = document.getElementById("transcript");
+
+        const assistantLabel = "__AGENT_LABEL__";
 
         let socket = null;
         let mediaRecorder = null;
@@ -62,7 +81,7 @@ async def home():
             bubble.style.lineHeight = "1.8";
 
             bubble.innerHTML = `
-                <strong>${speaker === "customer" ? "Customer" : "Sira"}</strong>
+                <strong>${speaker === "customer" ? "Customer" : assistantLabel}</strong>
                 <br><br>
                 ${text}
             `;
@@ -156,13 +175,19 @@ async def home():
     </script>
 </body>
 </html>
-""")
+"""
+    page = page.replace("__PLATFORM_NAME__", PLATFORM_NAME)
+    page = page.replace("__AGENT_LABEL__", AGENT_LABEL)
+
+    return HTMLResponse(page)
 
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    await websocket.send_text("Connected to Sira realtime backend.")
+    await websocket.send_text(
+    f"Connected to {PLATFORM_NAME} realtime backend. Current agent: {AGENT_LABEL}."
+)
 
     chunk_count = 0
     audio_buffer = bytearray()
