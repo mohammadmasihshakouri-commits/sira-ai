@@ -70,13 +70,12 @@ from faster_whisper import WhisperModel
 # Settings
 # -----------------------------
 
-DEVICE = "cuda"
-COMPUTE_TYPE = "float16"
+DEVICE = os.getenv("STT_DEVICE", "cuda")
+COMPUTE_TYPE = os.getenv("STT_COMPUTE_TYPE", "float16")
 
-WHISPER_MODEL_NAME = os.path.join(
-    BASE_DIR,
-    "models",
-    "faster-whisper-large-v3"
+WHISPER_MODEL_NAME = os.getenv(
+    "WHISPER_MODEL_PATH",
+    os.path.join(BASE_DIR, "models", "faster-whisper-large-v3"),
 )
 
 OLLAMA_MODEL = "qwen-callcenter"
