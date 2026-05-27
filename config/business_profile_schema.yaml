@@ -1,0 +1,54 @@
+business_profile_schema:
+
+  business:
+    business_id: string
+    business_name: string
+    industry: string
+    default_language: string
+
+  agents:
+    agent_key: string
+    enabled: boolean
+    agent_type: string
+
+    identity:
+      agent_name: string
+      tone: string
+      language: string
+
+    call_settings:
+      greeting_enabled: boolean
+      collect_caller_name: boolean
+      collect_phone_number: boolean
+      allow_human_handoff: boolean
+
+    tools:
+      enabled_tools:
+        - string
+
+    playbooks:
+      enabled_playbooks:
+        - string
+
+  supported_agent_types:
+    - support_agent
+    - receptionist_agent
+    - sales_agent
+    - booking_agent
+    - follow_up_agent
+
+  supported_tools:
+    - crm_lookup
+    - order_lookup
+    - ticket_create
+    - knowledge_base
+    - human_transfer
+    - calendar_lookup
+    - appointment_create
+    - appointment_update
+
+  supported_call_settings:
+    greeting_enabled: boolean
+    collect_caller_name: boolean
+    collect_phone_number: boolean
+    allow_human_handoff: boolean

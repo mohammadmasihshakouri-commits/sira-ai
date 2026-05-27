@@ -1,0 +1,64 @@
+business_name: Cinematicket
+
+industry: cinema_ticketing
+
+language: fa
+
+agents:
+
+  support:
+
+    enabled: true
+
+    agent_type: support_agent
+
+    agent_identity:
+      agent_name: آوا
+      tone: professional_friendly
+
+    enabled_tools:
+      - crm_lookup
+      - order_lookup
+      - ticket_create
+      - knowledge_base
+      - human_transfer
+
+    playbooks:
+      - cancellation
+      - payment_issue
+      - order_lookup
+      - technical_issue
+
+    call_settings:
+      greeting_enabled: true
+      collect_caller_name: false
+      collect_phone_number: true
+      allow_human_handoff: true
+
+  receptionist:
+
+    enabled: true
+
+    agent_type: receptionist_agent
+
+    agent_identity:
+      agent_name: نیلا
+      tone: professional_friendly
+
+    enabled_tools:
+      - crm_lookup
+      - calendar_lookup
+      - appointment_create
+      - appointment_update
+      - human_transfer
+
+    playbooks:
+      - take_message
+      - transfer_call
+      - book_appointment
+
+    call_settings:
+      greeting_enabled: true
+      collect_caller_name: true
+      collect_phone_number: true
+      allow_human_handoff: true

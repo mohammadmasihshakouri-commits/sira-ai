@@ -1,0 +1,23 @@
+agent_type: support_agent
+
+purpose: customer_support
+
+identity_required:
+  ask_name: false
+  ask_phone: true
+
+default_start: gather_intent
+
+core_flows:
+  - cancellation
+  - order_lookup
+  - payment_issue
+  - technical_issue
+  - human_handoff
+
+tools:
+  - crm_lookup
+  - order_lookup
+  - ticket_create
+  - knowledge_base
+  - human_transfer

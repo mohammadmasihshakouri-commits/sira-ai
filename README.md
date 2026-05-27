@@ -1,165 +1,211 @@
-# Sira Realtime Voice Agent
+# Sira AI
 
-![Sira Demo](assets/demo.png)
+## Realtime AI Customer Support Platform
 
-Sira is a realtime multilingual AI voice agent prototype for natural business phone conversations.
+Sira AI is a configurable AI customer support infrastructure platform designed for realtime voice interactions, intelligent support workflows, and future omnichannel customer operations.
 
+The platform is being built to support:
 
+* realtime voice agents
+* inbound & outbound phone calls
+* multilingual conversations
+* AI-driven support routing
+* future chat & WhatsApp integrations
+* customizable business-specific AI agents
 
-It combines live browser audio streaming, speech-to-text, intent routing, playbook-based business logic, guardrails, and conversational AI responses.
+Sira is not tied to a specific industry.
+It is designed as a white-label AI support platform that businesses can configure for their own workflows, branding, and customer experience.
 
+---
 
+# Vision
 
-\## What it does
+Sira aims to become a scalable AI support infrastructure layer for modern businesses.
 
+Instead of building isolated chatbots, the goal is to create:
 
+* realtime conversational systems
+* telephony-ready AI agents
+* support workflow orchestration
+* customizable business AI identities
+* enterprise-ready customer operations infrastructure
 
-\- Streams microphone audio from the browser through WebSocket
+---
 
-\- Transcribes speech using faster-whisper
+# Current Features
 
-\- Detects user intent and routes conversations
+* Realtime browser audio streaming
+* Multilingual speech recognition
+* Faster-Whisper Large V3 integration
+* GPU acceleration with CUDA
+* Realtime transcript streaming
+* WebSocket-based communication
+* AI conversational routing
+* Fast support handlers
+* Live assistant response rendering
+* Pipecat experimental realtime architecture
+* Production-oriented voice pipeline research
 
-\- Follows business-specific playbooks and rules
+---
 
-\- Handles reservation codes, phone numbers, confirmations, and retries
+# Architecture Direction
 
-\- Supports Persian and English, with multilingual expansion in mind
+Current development stack includes:
 
-\- Provides a polished Gradio demo UI and a realtime WebSocket demo
+* Python
+* FastAPI
+* WebSockets
+* Gradio
+* Ollama
+* Qwen 2.5
+* Faster-Whisper
+* Pipecat
 
+Future architecture direction:
 
+* LiveKit
+* SIP telephony
+* CRM integrations
+* WhatsApp integrations
+* Voice + chat orchestration
+* Business-configurable AI agents
 
-\## Core Features
+---
 
+# AI Agent Identity System
 
+Sira is the platform name — not necessarily the AI agent name used in customer calls.
 
-\- Realtime audio streaming
+Each business will eventually be able to configure:
 
-\- Live transcript rendering
+* agent identity
+* greeting style
+* language
+* tone
+* workflows
+* business branding
 
-\- AI response bubbles
+through a future dashboard interface.
 
-\- Persian STT normalization layer
-
-\- Number and reservation-code parsing
-
-\- Guardrails for out-of-domain questions
-
-\- Playbook-driven conversation flows
-
-\- Modular backend structure
-
-
-
-\## Architecture
-
-
-
-```text
-
-Browser Microphone
-
-&nbsp;     ↓
-
-WebSocket Audio Stream
-
-&nbsp;     ↓
-
-Realtime STT Pipeline
-
-&nbsp;     ↓
-
-Normalization Layer
-
-&nbsp;     ↓
-
-Intent / Playbook Engine
-
-&nbsp;     ↓
-
-AI Response Orchestration
-
-&nbsp;     ↓
-
-Live Conversation UI
-
-## Configuration
-
-Sira is moving from local demo-specific settings toward a configurable, workspace-based architecture.
-
-The project supports environment-based configuration through `.env` values.  
-Use `.env.example` as the reference file:
-
-```bash
-cp .env.example .env
-```
-
-On Windows PowerShell:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-### Workspace and business config
-
-By default, Sira uses the Cinematicket demo workspace:
-
-```env
-SIRA_WORKSPACE_ID=cinematicket
-```
-
-Runtime config files are loaded from:
+Example:
 
 ```text
-businesses/{workspace_id}/agent.yaml
-businesses/{workspace_id}/playbook.yaml
+Platform: Sira
+Business: Cinematicket
+Agent Name: Ava
 ```
 
-For the current demo, this means:
+Customer experience:
 
 ```text
-businesses/cinematicket/agent.yaml
-businesses/cinematicket/playbook.yaml
+"Hello, this is Ava, the AI support assistant for Cinematicket."
 ```
 
-### Agent identity
+---
 
-The agent name is intentionally not hardcoded.
+# Telephony Vision
 
-In the current demo config, the agent identity is defined as:
+Sira is being designed with future telephony support in mind.
 
-```yaml
-agent:
-  name: null
-  name_source: "dashboard"
+Target architecture:
+
+```text
+Phone Call
+→ SIP Provider
+→ LiveKit
+→ Sira AI Agent
+→ Business Workflows
 ```
 
-This keeps the backend ready for the future dashboard, where each business will be able to choose its own AI agent name and identity.
+Planned support:
 
-### Speech-to-text config
+* inbound phone calls
+* outbound phone calls
+* realtime AI call handling
+* multilingual support conversations
 
-Whisper/STT settings can be configured with:
+---
 
-```env
-WHISPER_MODEL_PATH=models/faster-whisper-large-v3
-STT_DEVICE=cuda
-STT_COMPUTE_TYPE=float16
+# Current Development Status
+
+The project is currently transitioning from:
+
+* a realtime AI demo
+
+into:
+
+* a scalable AI support platform architecture
+
+Current focus areas:
+
+* realtime orchestration
+* voice pipelines
+* conversational architecture
+* agent workflow systems
+* telephony-ready infrastructure
+
+---
+
+# Repository Structure
+
+```text
+components/
+config/
+core/
+flows/
+quality/
+experiments/
 ```
 
-### Ollama config
+Key files:
 
-The local LLM endpoint can be configured with:
+* app.py
+* realtime_demo.py
+* experiments/pipecat/sira_pipeline.py
 
-```env
-OLLAMA_MODEL=qwen-callcenter
-OLLAMA_URL=http://localhost:11434/api/generate
-```
+---
 
-### Notes
+# Experimental Realtime Research
 
-- `.env` should not be committed.
-- `.env.example` should be committed as the public reference.
-- Sira is the platform name.
-- The spoken assistant/agent name should come from business configuration or the dashboard, not from hardcoded backend logic.
-- Cinematicket is currently the demo workspace, not the full product identity.
+The project currently includes experimental work with:
+
+* Pipecat realtime pipelines
+* processor chains
+* frame-based conversational routing
+* realtime architecture exploration
+
+Future experiments will include:
+
+* LiveKit
+* SIP integrations
+* scalable voice infrastructure
+
+---
+
+# Long-Term Goals
+
+* AI phone support infrastructure
+* Omnichannel customer support
+* Enterprise AI operations platform
+* Voice + chat orchestration
+* Configurable AI business agents
+* GCC / UAE market deployment
+
+---
+
+# Philosophy
+
+Sira is being built as:
+
+* infrastructure, not just a chatbot
+* configurable, not hardcoded
+* realtime-first
+* telephony-ready
+* business-agnostic
+* enterprise-oriented
+
+---
+
+# License
+
+MIT License

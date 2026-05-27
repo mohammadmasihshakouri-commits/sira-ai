@@ -1,0 +1,23 @@
+agent_type: receptionist_agent
+
+purpose: receptionist
+
+identity_required:
+  ask_name: true
+  ask_phone: true
+
+default_start: gather_identity
+
+core_flows:
+  - take_message
+  - book_appointment
+  - change_appointment
+  - cancel_appointment
+  - transfer_call
+
+tools:
+  - crm_lookup
+  - calendar_lookup
+  - appointment_create
+  - appointment_update
+  - human_transfer
