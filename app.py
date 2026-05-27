@@ -78,8 +78,8 @@ WHISPER_MODEL_NAME = os.getenv(
     os.path.join(BASE_DIR, "models", "faster-whisper-large-v3"),
 )
 
-OLLAMA_MODEL = "qwen-callcenter"
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen-callcenter")
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
 
 MAX_AUDIO_CONFIRMATION_FAILURES = 3
 
