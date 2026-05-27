@@ -39,9 +39,6 @@ from core.state import (
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-PLAYBOOK_PATH = os.path.join(BASE_DIR, "config", "cinematicket_playbook.yaml")
-PLAYBOOK_CACHE = None
-
 CUDA_DLL_PATHS = [
     os.path.join(BASE_DIR, "venv", "Lib", "site-packages", "nvidia", "cublas", "bin"),
     os.path.join(BASE_DIR, "venv", "Lib", "site-packages", "nvidia", "cudnn", "bin"),
