@@ -13,15 +13,15 @@ sys.path.append(str(PROJECT_ROOT))
 import app
 from core.channel_adapters import telegram_adapter
 from core.sira_runtime import handle_message
-from core.business_profile_loader import get_business_agent
+from core.business_profile_loader import get_resolved_business_agent
 from core.response_variants import random_greeting
 
 load_dotenv(PROJECT_ROOT / ".env")
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-business_agent = get_business_agent("cinematicket", "support")
-enabled_playbooks = business_agent["agent_config"].get("playbooks", [])
+business_agent = get_resolved_business_agent("cinematicket", "support")
+enabled_playbooks = business_agent.get("enabled_playbooks", [])
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -39,11 +39,15 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     greeting = random_greeting()
 
+    agent_identity = business_agent.get("agent_identity", {})
+    agent_name = agent_identity.get("agent_name", "دستیار هوشمند")
+    business_name = business_agent.get("business_name", "این مجموعه")
+
     await update.message.reply_text(
-    f"{greeting}\n"
-    "من آوا هستم، پشتیبان سینماتیکت 🌸\n"
-    "بفرمایید چطور می‌تونم راهنمایی‌تون کنم؟"
-)
+        f"{greeting}\n"
+        f"من {agent_name} هستم، پشتیبان {business_name} 🌸\n"
+        "بفرمایید چطور می‌تونم راهنمایی‌تون کنم؟"
+    )
 
 async def handle_telegram_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
