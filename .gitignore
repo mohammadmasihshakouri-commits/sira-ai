@@ -11,3 +11,10 @@ cleaned_calls/
 *.xlsx
 
 .env
+
+# Local credentials / tokens
+credentials/
+*.credentials.json
+*token*.json
+google_calendar_credentials.json
+google_calendar_token.json
