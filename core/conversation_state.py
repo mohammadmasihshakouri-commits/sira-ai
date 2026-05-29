@@ -4,7 +4,8 @@ WAITING_FOR_RESERVATION_CODE = "waiting_for_reservation_code"
 WAITING_FOR_CONFIRMATION = "waiting_for_confirmation"
 RESOLVED = "resolved"
 HANDOFF_NEEDED = "handoff_needed"
-
+WAITING_FOR_SEAT_LOCK_CONFIRMATION = "waiting_for_seat_lock_confirmation"
+POST_RESOLUTION_CHECK = "post_resolution_check"
 
 def create_initial_state():
     return {
