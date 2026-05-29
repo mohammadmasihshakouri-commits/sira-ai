@@ -68,6 +68,8 @@ def run_playbook_turn(user_text, conversation_state, enabled_playbooks):
             }
 
         if intent == "closing_no_more_questions":
+            set_state(conversation_state, RESOLVED)
+
             return {
                 "handled": True,
                 "reply": (
@@ -135,6 +137,8 @@ def run_playbook_turn(user_text, conversation_state, enabled_playbooks):
             order_result = lookup_order(reservation_code)
 
             if order_result["found"]:
+                conversation_state["pending_value"] = None
+                conversation_state["pending_value_type"] = None
                 set_state(conversation_state, POST_RESOLUTION_CHECK)
 
                 return {
@@ -206,30 +210,6 @@ def run_playbook_turn(user_text, conversation_state, enabled_playbooks):
             "state": conversation_state,
         }
         
-    if any(keyword in user_text for keyword in SEAT_LOCK_KEYWORDS):
-        if any(keyword in user_text for keyword in SEAT_COLOR_CONFIRMED_KEYWORDS):
-            set_state(conversation_state, POST_RESOLUTION_CHECK)
-
-            return {
-                "handled": True,
-                "reply": (
-                    "بله، به این حالت رزرو موقت گفته میشه. "
-                    "صندلی معمولاً تا ۱۰ دقیقه بعد دوباره قابل انتخاب میشه."
-                ),
-                "source": "Playbook Runtime / seat_lock_confirmed_direct",
-                "topic": "seat_lock_issue",
-                "state": conversation_state,
-            }
-
-        set_state(conversation_state, WAITING_FOR_SEAT_LOCK_CONFIRMATION)
-
-        return {
-            "handled": True,
-            "reply": "یعنی صندلی به رنگ زرد دراومده؟",
-            "source": "Playbook Runtime / seat_lock_clarification",
-            "topic": "seat_lock_issue",
-            "state": conversation_state,
-        }
     if any(keyword in user_text for keyword in SEAT_LOCK_KEYWORDS):
         if any(keyword in user_text for keyword in SEAT_COLOR_CONFIRMED_KEYWORDS):
             set_state(conversation_state, POST_RESOLUTION_CHECK)
