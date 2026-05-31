@@ -19,6 +19,8 @@ from core.number_parser import (
     enrich_text_with_detected_number,
 )
 
+from core.receptionist_turn_handler import handle_receptionist_turn
+from core.voice_greeting import build_voice_opening_greeting
 from core.playbook_engine import load_playbook
 
 from core.state import (
@@ -33,6 +35,7 @@ from core.state import (
     set_audio_failure_count,
     reset_audio_failure_count,
 )
+
 # -----------------------------
 # Fix CUDA DLL paths on Windows
 # -----------------------------
@@ -2391,6 +2394,44 @@ def process_voice(audio_path, history, stt_test_mode=False, presentation_mode=Tr
             )
 
         return output_text, history
+
+    agent_mode = os.getenv("SIRA_AGENT_MODE", "support").strip().lower()
+
+    if agent_mode == "receptionist":
+        if not normalized_text:
+            reply_language = get_last_user_language(history)
+            assistant_reply = unclear_stt_reply(reply_language)
+            return finish_reply(assistant_reply, "Receptionist Voice Handler / bad_stt_empty")
+
+        if looks_like_bad_stt(normalized_text):
+            reply_language = get_last_user_language(history)
+            assistant_reply = unclear_stt_reply(reply_language)
+            return finish_reply(assistant_reply, "Receptionist Voice Handler / bad_stt_unclear")
+
+        try:
+            receptionist_result = handle_receptionist_turn(
+                normalized_text,
+                conversation_state={},
+                business_context={},
+            )
+
+            assistant_reply = receptionist_result.get("reply", "")
+            assistant_reply = clean_persian_tone(assistant_reply, detected_language)
+
+            action = receptionist_result.get("action", "unknown")
+            source = f"Receptionist Voice Handler / {action}"
+
+            return finish_reply(assistant_reply, source)
+
+        except Exception as error:
+            print("Receptionist handler error:", error)
+
+            if detected_language == "en":
+                assistant_reply = "Sorry, I didn't fully understand. Could you please repeat that?"
+            else:
+                assistant_reply = "ببخشید، کامل متوجه نشدم. لطفاً یک بار دیگه بفرمایید."
+
+            return finish_reply(assistant_reply, "Receptionist Voice Handler / error")
 
     recent_assistant_text = " ".join([
         item.get("content", "")
