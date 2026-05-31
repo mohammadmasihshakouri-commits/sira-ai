@@ -4,6 +4,7 @@ from typing import Any
 
 from core.datetime_parser import parse_datetime_hint
 from core.receptionist_intent_analyzer import analyze_receptionist_intent
+from core.slot_selection_parser import parse_slot_selection
 
 
 def _has_customer_identity(conversation_state: dict[str, Any]) -> bool:
@@ -20,7 +21,53 @@ def build_receptionist_plan(
 ) -> dict[str, Any]:
     conversation_state = conversation_state or {}
     business_context = business_context or {}
+    if conversation_state.get("pending_action") == "select_available_slot":
+        offered_slots = conversation_state.get("offered_slots", [])
+        slot_selection = parse_slot_selection(user_text, offered_slots)
 
+        if slot_selection.get("clarification_needed"):
+            return {
+                "action": "ask_slot_selection_clarification",
+                "reply_hint": slot_selection.get("clarification_question", ""),
+                "slot_selection": slot_selection,
+                "intent": {
+                    "intent": "select_offered_slot",
+                    "confidence": 1.0,
+                },
+                "datetime": {},
+                "has_customer_identity": _has_customer_identity(conversation_state),
+            }
+
+        selected_slot = slot_selection.get("selected_slot")
+        has_identity = _has_customer_identity(conversation_state)
+
+        if not has_identity:
+            return {
+                "action": "collect_customer_identity",
+                "reply_hint": "برای ثبت این تایم، لطفاً نام و شماره موبایلتون رو بفرمایید.",
+                "slot_selection": slot_selection,
+                "selected_slot": selected_slot,
+                "next_pending_action": "collect_identity_for_selected_slot",
+                "intent": {
+                    "intent": "select_offered_slot",
+                    "confidence": 1.0,
+                },
+                "datetime": {},
+                "has_customer_identity": False,
+            }
+
+        return {
+            "action": "create_appointment_from_selected_slot",
+            "reply_hint": "",
+            "slot_selection": slot_selection,
+            "selected_slot": selected_slot,
+            "intent": {
+                "intent": "select_offered_slot",
+                "confidence": 1.0,
+            },
+            "datetime": {},
+            "has_customer_identity": True,
+        }
     intent_result = analyze_receptionist_intent(
         user_text=user_text,
         conversation_state=conversation_state,
