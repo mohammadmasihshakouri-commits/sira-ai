@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -10,6 +8,7 @@ from core.receptionist_availability import (
     check_requested_slot_availability,
     find_available_slots_for_day,
 )
+from core.receptionist_identity_parser import parse_customer_identity
 from core.receptionist_planner import build_receptionist_plan
 from core.receptionist_response_builder import build_receptionist_reply
 
@@ -60,6 +59,76 @@ def handle_receptionist_turn(
 ) -> dict[str, Any]:
     conversation_state = conversation_state or {}
     business_context = business_context or {}
+
+    if conversation_state.get("pending_action") == "collect_identity_for_selected_slot":
+        identity = parse_customer_identity(user_text)
+
+        updated_state = dict(conversation_state)
+
+        if identity.get("full_name"):
+            updated_state["full_name"] = identity["full_name"]
+
+        if identity.get("phone"):
+            updated_state["phone"] = identity["phone"]
+
+        if not updated_state.get("full_name") or not updated_state.get("phone"):
+            return {
+                "reply": "برای ثبت وقت، لطفاً نام و شماره موبایلتون رو کامل بفرمایید.",
+                "action": "collect_customer_identity",
+                "plan": {
+                    "action": "collect_customer_identity",
+                    "identity": identity,
+                },
+                "execution": {
+                    "executed": False,
+                    "reason": "missing_customer_identity",
+                },
+                "conversation_state": updated_state,
+            }
+
+        selected_slot = updated_state.get("selected_slot") or {}
+
+        plan = {
+            "action": "create_appointment_from_selected_slot",
+            "selected_slot": selected_slot,
+            "intent": {
+                "service": updated_state.get("pending_service", "وقت مراجعه"),
+            },
+            "datetime": {},
+            "has_customer_identity": True,
+        }
+
+        execution_result = execute_receptionist_action(
+            plan,
+            conversation_state=updated_state,
+        )
+
+        if execution_result.get("executed"):
+            appointment = execution_result.get("appointment", {})
+            service = appointment.get("service", "وقت مراجعه")
+            start_time = appointment.get("start_time", "")
+
+            updated_state["pending_action"] = ""
+            updated_state["selected_slot"] = {}
+            updated_state["offered_slots"] = []
+
+            reply = f"نوبت {service} برای {start_time} ثبت شد."
+
+            return {
+                "reply": reply,
+                "action": "create_appointment_from_selected_slot",
+                "plan": plan,
+                "execution": execution_result,
+                "conversation_state": updated_state,
+            }
+
+        return {
+            "reply": "متأسفم، ثبت نوبت انجام نشد. لطفاً یک بار دیگه تلاش کنیم.",
+            "action": "create_appointment_from_selected_slot",
+            "plan": plan,
+            "execution": execution_result,
+            "conversation_state": updated_state,
+        }
 
     plan = build_receptionist_plan(
         user_text=user_text,
@@ -141,7 +210,32 @@ def handle_receptionist_turn(
             "availability": availability,
             "conversation_state": updated_state,
         }
-    
+
+    if (
+        plan.get("action") == "collect_customer_identity"
+        and plan.get("next_pending_action") == "collect_identity_for_selected_slot"
+    ):
+        updated_state = dict(conversation_state)
+        updated_state["pending_action"] = "collect_identity_for_selected_slot"
+        updated_state["selected_slot"] = plan.get("selected_slot", {})
+        updated_state["pending_service"] = (
+            updated_state.get("pending_service")
+            or plan.get("intent", {}).get("service", "")
+            or "وقت مراجعه"
+        )
+
+        reply_result = build_receptionist_reply(plan)
+
+        return {
+            "reply": reply_result["reply"],
+            "action": reply_result["action"],
+            "plan": plan,
+            "execution": {
+                "executed": False,
+                "reason": "waiting_for_customer_identity",
+            },
+            "conversation_state": updated_state,
+        }
 
     execution_result = execute_receptionist_action(
         plan,
