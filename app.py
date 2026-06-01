@@ -2798,8 +2798,35 @@ def process_voice(audio_path, history, stt_test_mode=False, presentation_mode=Tr
             assistant_reply = "ببخشید، کامل متوجه نشدم. جسارتاً یک بار دیگه تکرار می‌کنید؟"
 
     return finish_reply(assistant_reply, source, llm_time)
+
+def build_voice_opening_output_text() -> str:
+    greeting = build_voice_opening_greeting()
+
+    return (
+        f"Customer said:\n"
+        f"\n\n"
+        f"━━━━━━━━━━━━━━\n\n"
+        f"Sira replied:\n"
+        f"{greeting}\n\n"
+        f"━━━━━━━━━━━━━━\n\n"
+        f"Conversation state:\n"
+        f"Opening greeting\n\n"
+        f"Latency:\n"
+        f"0 seconds"
+    )
+
+
+def build_initial_voice_history():
+    return [
+        {
+            "role": "Assistant",
+            "content": build_voice_opening_greeting(),
+        }
+    ]
+
+
 def reset_conversation():
-    return [], "Conversation reset."
+    return build_initial_voice_history(), build_voice_opening_output_text()
 
 
 custom_css = """
@@ -3161,7 +3188,7 @@ with gr.Blocks(
     </div>
     """)
 
-    state = gr.State([])
+    state = gr.State(build_initial_voice_history())
 
     with gr.Row(equal_height=True):
 
@@ -3223,7 +3250,8 @@ with gr.Blocks(
                 label="",
                 lines=18,
                 elem_id="conversation_output",
-                container=False
+                container=False,
+                value=build_voice_opening_output_text()
             )
 
     gr.HTML("""
