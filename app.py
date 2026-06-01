@@ -5,6 +5,8 @@ import random
 import yaml
 import tempfile
 import subprocess
+import json
+
 from core.runtime_config import (
     get_platform_name,
     get_workspace_name,
@@ -2409,10 +2411,17 @@ def process_voice(audio_path, history, stt_test_mode=False, presentation_mode=Tr
             return finish_reply(assistant_reply, "Receptionist Voice Handler / bad_stt_unclear")
 
         try:
+            conversation_state = get_receptionist_conversation_state(history)
+
             receptionist_result = handle_receptionist_turn(
                 normalized_text,
-                conversation_state={},
+                conversation_state=conversation_state,
                 business_context={},
+            )
+
+            set_receptionist_conversation_state(
+                history,
+                receptionist_result.get("conversation_state", {}),
             )
 
             assistant_reply = receptionist_result.get("reply", "")
@@ -2825,8 +2834,34 @@ def build_initial_voice_history():
     ]
 
 
+def get_receptionist_conversation_state(history):
+    raw_state = get_state_value(history, "receptionist_state", "{}")
+
+    if isinstance(raw_state, dict):
+        return raw_state
+
+    try:
+        parsed_state = json.loads(str(raw_state or "{}"))
+    except json.JSONDecodeError:
+        return {}
+
+    if isinstance(parsed_state, dict):
+        return parsed_state
+
+    return {}
+
+
+def set_receptionist_conversation_state(history, conversation_state):
+    set_state_value(
+        history,
+        "receptionist_state",
+        json.dumps(conversation_state or {}, ensure_ascii=False),
+    )
+
 def reset_conversation():
-    return build_initial_voice_history(), build_voice_opening_output_text()
+    history = build_initial_voice_history()
+    set_receptionist_conversation_state(history, {})
+    return history, build_voice_opening_output_text()
 
 
 custom_css = """
