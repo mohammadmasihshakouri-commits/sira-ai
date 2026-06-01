@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Any
 
+from core.tools.google_calendar_tools import create_calendar_event
 from core.tools.google_sheets_tools import (
     create_appointment,
     create_client,
@@ -77,6 +78,20 @@ def execute_receptionist_action(
     if not end_time:
         end_time = _calculate_end_time(start_time)
 
+    calendar_event = create_calendar_event(
+        summary=f"{service} - {full_name}",
+        start_time=start_time,
+        end_time=end_time,
+        description=(
+            f"Client: {full_name}\n"
+            f"Phone: {phone}\n"
+            f"Service: {service}\n"
+            f"Created by Sira receptionist."
+        ),
+    )
+
+    calendar_event_id = str(calendar_event.get("id", "") or "")
+
     appointment_result = create_appointment(
         client_id=client["client_id"],
         full_name=full_name,
@@ -84,6 +99,7 @@ def execute_receptionist_action(
         service=service,
         start_time=start_time,
         end_time=end_time,
+        calendar_event_id=calendar_event_id,
         notes="created by receptionist action executor",
     )
 
@@ -92,5 +108,6 @@ def execute_receptionist_action(
         "action": action,
         "client_created": client_created,
         "client": client,
+        "calendar_event": calendar_event,
         "appointment": appointment_result["appointment"],
     }
