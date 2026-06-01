@@ -138,7 +138,7 @@ def _append_row(sheet_name: str, row: list[Any]) -> dict[str, Any]:
         .append(
             spreadsheetId=spreadsheet_id,
             range=f"{sheet_name}!A:Z",
-            valueInputOption="USER_ENTERED",
+            valueInputOption="RAW",
             insertDataOption="INSERT_ROWS",
             body={"values": [row]},
         )
