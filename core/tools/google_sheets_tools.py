@@ -264,3 +264,80 @@ def create_call_log(
         "log_id": log_id,
         "timestamp": now,
     }
+
+def find_active_appointments_by_phone(phone: str) -> list[dict[str, Any]]:
+    rows = _read_range(f"{APPOINTMENTS_SHEET}!A:K")
+    normalized_phone = normalize_phone(phone)
+
+    if not rows:
+        return []
+
+    headers = rows[0]
+    data_rows = rows[1:]
+
+    active_statuses = {"scheduled", "confirmed", "pending"}
+
+    appointments = []
+
+    for index, row in enumerate(data_rows, start=2):
+        padded_row = row + [""] * (len(headers) - len(row))
+        record = dict(zip(headers, padded_row))
+        record["_row_number"] = index
+
+        record_phone = normalize_phone(record.get("phone", ""))
+        status = str(record.get("status", "") or "").strip().lower()
+
+        if record_phone == normalized_phone and status in active_statuses:
+            appointments.append(record)
+
+    return appointments
+
+
+def create_appointment(
+    client_id: str,
+    full_name: str,
+    phone: str,
+    service: str,
+    start_time: str,
+    end_time: str,
+    status: str = "scheduled",
+    calendar_event_id: str = "",
+    notes: str = "",
+) -> dict[str, Any]:
+    now = _now_iso()
+    appointment_id = f"appt_{uuid.uuid4().hex[:12]}"
+
+    normalized_phone = normalize_phone(phone)
+
+    row = [
+        appointment_id,
+        client_id,
+        full_name,
+        normalized_phone,
+        service,
+        start_time,
+        end_time,
+        status,
+        calendar_event_id,
+        now,
+        notes,
+    ]
+
+    _append_row(APPOINTMENTS_SHEET, row)
+
+    return {
+        "created": True,
+        "appointment": {
+            "appointment_id": appointment_id,
+            "client_id": client_id,
+            "full_name": full_name,
+            "phone": normalized_phone,
+            "service": service,
+            "start_time": start_time,
+            "end_time": end_time,
+            "status": status,
+            "calendar_event_id": calendar_event_id,
+            "created_at": now,
+            "notes": notes,
+        },
+    }
